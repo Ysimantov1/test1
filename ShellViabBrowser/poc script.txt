@@ -1,0 +1,21 @@
+
+while ($true) {
+
+$proccess = Get-Process
+
+foreach ($procces in $proccess) {
+
+  if ($procces.ProcessName -eq "chrome") {
+   
+
+    if ($procces.CPU -gt 3 -AND $procces.CPU -lt 30) {
+         
+         Stop-Process -Id $procces.Id -Force
+         
+    
+    }
+    
+  }
+
+	}
+ }
