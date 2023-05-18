@@ -1,0 +1,38 @@
+# Install the FluentFTP module if not already installed
+Install-Module -Name FluentFTP -Scope CurrentUser -Force
+
+# Import the FluentFTP module
+Import-Module -Name FluentFTP
+
+# Define FTP connection details
+$ftpServer = "ftp.example.com"
+$ftpPort = 443
+$ftpUsername = "username"
+$ftpPassword = "password"
+$remoteFilePath = "/path/to/file.txt"
+$localFilePath = "C:\path\to\save\file.txt"
+
+# Create a new FTP client instance
+$ftpClient = New-Object -TypeName FluentFTP.FtpClient
+
+try {
+    # Connect to the FTP server
+    $ftpClient.Connect($ftpServer, $ftpPort)
+    
+    # Authenticate with the provided username and password
+    $ftpClient.Credentials = New-Object -TypeName System.Net.NetworkCredential($ftpUsername, $ftpPassword)
+    
+    # Download the file from the FTP server
+    $ftpClient.DownloadFile($localFilePath, $remoteFilePath)
+    
+    # Output a success message
+    Write-Host "File downloaded successfully."
+}
+catch {
+    # Output an error message if any exception occurs
+    Write-Host "Error occurred: $_"
+}
+finally {
+    # Disconnect from the FTP server
+    $ftpClient.Disconnect()
+}
