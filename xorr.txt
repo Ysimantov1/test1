@@ -1,0 +1,15 @@
+# --- Config ---
+$inputFile = "C:\Path\To\Your\File.txt"
+$outputFile = "C:\Path\To\Your\obfuscated.bin"
+$key = 0x42  # XOR key (can be any byte)
+
+# --- XOR Encode ---
+[byte[]]$bytes = [System.IO.File]::ReadAllBytes($inputFile)
+
+for ($i = 0; $i -lt $bytes.Length; $i++) {
+    $bytes[$i] = $bytes[$i] -bxor $key
+}
+
+[System.IO.File]::WriteAllBytes($outputFile, $bytes)
+
+Write-Host "[+] XOR-obfuscated file saved to $outputFile"
