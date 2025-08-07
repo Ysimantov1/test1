@@ -1,6 +1,17 @@
 $domain = ([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).Name
 $searcher = New-Object DirectoryServices.DirectorySearcher
 $searcher.Filter = "(objectCategory=person)"
-$searcher.PropertiesToLoad.Add("samaccountname") > $null
+$searcher.PageSize = 1000
+$searcher.PropertiesToLoad.Add("sAMAccountName") > $null
+
 $results = $searcher.FindAll()
-$results | ForEach-Object { $_.Properties.samaccountname }
+$users = @()
+
+foreach ($result in $results) {
+    if ($result.Properties["samaccountname"]) {
+        $users += $result.Properties["samaccountname"]
+    }
+}
+
+$users | Out-File -Encoding ASCII -FilePath "domain_users.txt"
+Write-Host "Saved to domain_users.txt"
