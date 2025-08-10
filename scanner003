@@ -1,0 +1,73 @@
+param(
+    [switch]$UseMultiThreading,  # This switch controls whether multi-threading is used
+    [switch]$VerboseOutput       # This switch controls verbose output
+)
+
+# List of specific ports to check
+$ports = 80, 443, 8080
+
+# Specify the range of IP addresses (e.g., 192.168.1.1 to 192.168.1.254)
+$ipRange = 1..254 | % { "172.16.2.$_" }
+
+# Randomize the order of the IPs and ports
+$ports = $ports | Get-Random
+$ipRange = $ipRange | Get-Random
+
+# Parameters to control the slow start and fast ramp-up
+$initialDelay = 5  # Initial delay for the first few scans (seconds)
+$finalDelay = 1    # Final delay once we increase the speed (seconds)
+$jobsLimit = 10     # Max number of parallel jobs (multi-threading)
+
+# Function to scan a single IP and port
+function Scan-Port {
+    param (
+        [string]$ip,
+        [int]$port
+    )
+    try {
+        # Attempt to connect to the IP and port
+        if ($VerboseOutput) { Write-Verbose "Attempting to connect to $ip on port $port..." }
+        (new-object Net.Sockets.TcpClient).Connect($ip, $port)
+        if ($VerboseOutput) { Write-Verbose "Port $port is open on $ip" }
+        echo "Port $port open on $ip"
+    }
+    catch {
+        if ($VerboseOutput) { Write-Verbose "Failed to connect to $ip on port $port" }
+        # No output for closed ports
+    }
+}
+
+# If multi-threading is not used, start scanning slowly
+if (-not $UseMultiThreading) {
+    # Slowly scan with delay
+    $ipRange | % {
+        $ip = $_
+
+        $ports | % {
+            # Scan at a slow speed initially
+            Scan-Port -ip $ip -port $_
+
+            # Add a delay before the next scan (initially slow)
+            Start-Sleep -Seconds $initialDelay
+        }
+    }
+} else {
+    # Perform multi-threaded scanning with fast speed
+    $ipRange | % {
+        $ip = $_
+
+        $ports | % {
+            # Start parallel scanning using jobs (multi-threading)
+            $null = Start-Job -ScriptBlock {
+                Scan-Port -ip $args[0] -port $args[1]
+            } -ArgumentList $ip, $_
+
+            if ($VerboseOutput) { Write-Verbose "Started scanning $ip on port $_ in parallel job" }
+
+            # No delay between fast scans, so this will flood the network quickly
+        }
+    }
+
+    # Wait for all jobs to complete before exiting
+    Get-Job | Wait-Job | Receive-Job
+}
