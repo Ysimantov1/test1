@@ -1,0 +1,13 @@
+# List the specific ports you want to check
+$ports = 80, 443, 8080
+
+$ports | % {
+    try {
+        # Attempt to connect to each specified port
+        (new-object Net.Sockets.TcpClient).Connect("www.ynet.co.il", $_)
+        echo "Port $_ open"
+    }
+    catch {
+        # If connection fails, silently skip the error (no output for closed ports)
+    }
+}
