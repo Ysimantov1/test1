@@ -5,11 +5,11 @@ param(
     [switch]$VerboseOutput       # This switch controls verbose output
 )
 
-# List of specific ports to check
-$ports = 80, 443, 8080
+# Expanded list of well-known ports to check, including red team tools and common protocols
+$ports = 20, 21, 22, 23, 25, 53, 67, 68, 80, 110, 143, 445, 139, 443, 8080, 3389, 4444, 6660, 6666, 7777, 1080, 31337, 5000
 
 # Specify the range of IP addresses (e.g., 192.168.1.1 to 192.168.1.254)
-$ipRange = 1..254 | % { "172.16.2.$_" }
+$ipRange = 1..254 | % { "192.168.1.$_" }
 
 # Randomize the order of the IPs and ports
 $ports = $ports | Get-Random
@@ -61,7 +61,25 @@ if (-not $UseMultiThreading) {
         $ports | % {
             # Start parallel scanning using jobs (multi-threading)
             $null = Start-Job -ScriptBlock {
-                Scan-Port -ip $args[0] -port $args[1]
+                param($ip, $port)
+
+                # Include the Scan-Port function inside the job to avoid scope issues
+                function Scan-Port {
+                    param (
+                        [string]$ip,
+                        [int]$port
+                    )
+                    try {
+                        (new-object Net.Sockets.TcpClient).Connect($ip, $port)
+                        echo "Port $port open on $ip"
+                    }
+                    catch {
+                        # No output for closed ports
+                    }
+                }
+
+                # Call the Scan-Port function in the job
+                Scan-Port -ip $ip -port $port
             } -ArgumentList $ip, $_
 
             if ($VerboseOutput) { Write-Verbose "Started scanning $ip on port $_ in parallel job" }
@@ -73,4 +91,3 @@ if (-not $UseMultiThreading) {
     # Wait for all jobs to complete before exiting
     Get-Job | Wait-Job | Receive-Job
 }
-
