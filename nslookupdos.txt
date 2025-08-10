@@ -1,0 +1,26 @@
+# List of domains to query
+$domains = @(
+    "example.com", "test.com", "malicioussite.com", "google.com", "yahoo.com", "bing.com", "facebook.com",
+    "twitter.com", "amazon.com", "apple.com", "microsoft.com", "cnn.com", "reddit.com", "wikipedia.org",
+    "github.com", "stackoverflow.com", "wordpress.com", "tumblr.com", "linkedin.com", "instagram.com",
+    "pinterest.com", "netflix.com", "adobe.com", "paypal.com", "youtube.com", "quora.com", "nytimes.com",
+    "bbc.com", "cnbc.com", "forbes.com", "usatoday.com", "walmart.com", "target.com", "bestbuy.com",
+    "costco.com", "homedepot.com", "lowes.com", "ebay.com", "etsy.com", "shopify.com", "expedia.com",
+    "airbnb.com", "uber.com", "lyft.com", "zoom.us", "slack.com", "dropbox.com", "paypal.com", "venmo.com",
+    "square.com", "gitlab.com", "bitbucket.org", "heroku.com", "digitalocean.com", "vultr.com", "aws.amazon.com",
+    "azure.microsoft.com", "googlecloud.com", "ibm.com", "oracle.com", "redhat.com", "centos.org", "debian.org",
+    "ubuntu.com", "archlinux.org", "fedora.org", "windows.com", "apple.com", "docker.com", "kubernetes.io",
+    "jenkins.io", "ansible.com", "chef.io", "puppet.com", "saltstack.com", "circleci.com", "travis-ci.org",
+    "circleci.com", "datadog.com", "newrelic.com", "splunk.com", "loggly.com", "logz.io", "sumologic.com",
+    "prometheus.io", "grafana.com", "influxdata.com", "retool.com", "airtable.com", "zapier.com", "trello.com",
+    "basecamp.com", "notion.so", "evernote.com", "onenote.com", "quip.com", "microsoft.com", "zoho.com",
+    "freshdesk.com", "zendesk.com", "serviceNow.com", "salesforce.com", "hubspot.com", "mailchimp.com",
+    "constantcontact.com", "campaignmonitor.com", "activecampaign.com", "getresponse.com", "sendgrid.com",
+    "sparkpost.com", "mailgun.com", "postmarkapp.com", "mandrill.com", "sendinblue.com", "bitly.com", 
+    "goo.gl", "tinyurl.com", "is.gd", "short.io", "bit.do", "buff.ly", "rebrand.ly", "t.co", "wpengine.com"
+)
+
+# Loop to generate DNS requests
+foreach ($domain in $domains) {
+    Resolve-DnsName -Name $domain -Type A
+}
